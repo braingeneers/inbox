@@ -47,10 +47,9 @@ $(function() {
         resume: {
             enabled: true
         },
-        // Restrict files to 10GB and 5 net files per session
         validation: {
-            itemLimit: 5,
-            sizeLimit: 10737412742
+            itemLimit: 20,
+            sizeLimit: 20*1073741824
         },
         maxConnections: 5,
         thumbnails: {
