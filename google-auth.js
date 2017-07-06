@@ -18,8 +18,8 @@ $(function() {
 
                 // Get S3 credentials
                 s3DemoGlobals.assumeRoleWithWebIdentity({
-                    roleArn: "arn:aws:iam::238605363322:role/treehouse-receiving-role",
-                    idToken: authResult.id_token
+                  roleArn: "arn:aws:iam::238605363322:role/receiving-browser-role",
+                  idToken: authResult.id_token
                 });
 
                 // Ensure the user is asked to re-auth before the token expires
