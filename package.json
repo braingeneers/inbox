@@ -1,7 +1,8 @@
 {
-  "name": "trehouse-receiving-",
+  "name": "treehouse-receiving",
   "version": "1.0.0",
   "description": "Simple as possible, but no simpler, upload to Treehouse",
+  "main": "app.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com:UCSC-Treehouse/receiving.git"
@@ -11,8 +12,10 @@
   "dependencies": {},
   "devDependencies": {
     "eslint": "^3.19.0",
-    "eslint-config-jquery": "^1.0.1",
-    "webpack": "^3.0.0",
-    "webpack-dev-server": "^2.5.0"
+    "eslint-config-airbnb": "^15.0.1",
+    "eslint-plugin-import": "^2.3.0",
+    "eslint-plugin-jsx-a11y": "^5.0.3",
+    "eslint-plugin-react": "^7.1.0",
+    "reload": "^1.1.7"
   }
 }

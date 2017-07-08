@@ -1,6 +1,6 @@
 debug:
-	sudo ./node_modules/webpack-dev-server/bin/webpack-dev-server.js \
-		--progress --colors
+	# Serve app and auto reload
+	sudo ./node_modules/reload/bin/reload -p 80
 
 push:
 	# push to production

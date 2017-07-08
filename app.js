@@ -1,9 +1,52 @@
-/**
- * Sets up a Fine Uploader S3 jQuery UI instance, ensures files are saved under a "directory" in the bucket
- * bearing the logged-in user's name, provides a link to view the uploaded file after it has reached the bucket
- * and asks AWS for new credentials before those expire.
- */
+const s3DemoGlobals = {};
+
+// eslint-disable-next-line no-unused-vars
+function loginToGoogle(response) {
+  const profile = response.getBasicProfile();
+  s3DemoGlobals.email = profile.getEmail();
+  s3DemoGlobals.name = profile.getName();
+  s3DemoGlobals.assumeRoleWithWebIdentity({
+    roleArn: "arn:aws:iam::238605363322:role/receiving-browser-role",
+    idToken: response.getAuthResponse().id_token,
+  });
+  $("#fine-uploader-s3").show();
+}
+
 $(function() {
+  var assumeRoleWithWebIdentity = function(params) {
+    var sts = new AWS.STS(),
+      assumeRoleParams = {};
+
+    s3DemoGlobals.roleArn = params.roleArn || s3DemoGlobals.roleArn;
+    s3DemoGlobals.providerId = params.providerId || s3DemoGlobals.providerId;
+    s3DemoGlobals.idToken = params.idToken || s3DemoGlobals.idToken;
+
+    assumeRoleParams = {
+      RoleArn: s3DemoGlobals.roleArn,
+      RoleSessionName: "web-identity-federation",
+      WebIdentityToken: s3DemoGlobals.idToken
+    };
+
+    if (s3DemoGlobals.providerId) {
+      assumeRoleParams.ProviderId = s3DemoGlobals.providerId;
+    }
+
+    sts.assumeRoleWithWebIdentity(assumeRoleParams, params.callback || s3DemoGlobals.updateCredentials);
+  },
+    getFuCredentials = function(data) {
+      return {
+        accessKey: data.Credentials.AccessKeyId,
+        secretKey: data.Credentials.SecretAccessKey,
+        sessionToken: data.Credentials.SessionToken,
+        expiration: data.Credentials.Expiration
+      };
+    };
+
+  s3DemoGlobals.assumeRoleWithWebIdentity = assumeRoleWithWebIdentity;
+  s3DemoGlobals.getFuCredentials = getFuCredentials;
+
+
+
   bucketUrl = "https://receiving-treehouse-ucsc-edu.s3-us-west-2.amazonaws.com",
     updateCredentials = function(error, data) {
       if (!error) {
@@ -28,6 +71,7 @@ $(function() {
 
         // return qq.format("{}/{}.{}.{}", s3DemoGlobals.userName, filename, uuid, qq.getExtension(filename));
         return qq.format("{}/{}", s3DemoGlobals.email, filename);
+        // return qq.format("{}", filename);
       }
     },
     cors: {
@@ -51,12 +95,12 @@ $(function() {
       sizeLimit: 20*1073741824
     },
     maxConnections: 5,
-    thumbnails: {
-      placeholders: {
-        notAvailablePath: "not_available-generic.png",
-        waitingPath: "waiting-generic.png"
-      }
-    },
+    // thumbnails: {
+    //   placeholders: {
+    //     notAvailablePath: "not_available-generic.png",
+    //     waitingPath: "waiting-generic.png"
+    //   }
+    // },
     // callbacks: {
     //     onAllComplete: function (e) {
     //         window.alert("All complete. Notify Treehouse?");

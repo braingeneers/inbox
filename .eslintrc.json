@@ -1,2 +1,13 @@
 {
+  "env": {
+    "browser": true,
+    "commonjs": false,
+    "es6": false,
+    "jquery": true
+  },
+	"extends": "airbnb",
+  "rules": {
+    "no-console": 0,
+    "quotes": ["error", "double"]
+  }
 }
