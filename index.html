@@ -6,20 +6,20 @@
   <meta name="google-signin-scope" content="profile email">
   <meta name="google-signin-client_id"
         content="720533519149-ln2ekkiq372ckum34hhrv9d3cgno1bbu.apps.googleusercontent.com">
-  <script src="https://apis.google.com/js/platform.js" async defer></script>
 
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
   <link rel="stylesheet" 
         href="https://cdnjs.cloudflare.com/ajax/libs/file-uploader/5.14.4/s3.fine-uploader/fine-uploader-gallery.min.css" />
 
-
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
   <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/file-uploader/5.14.4/fine-uploader.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/file-uploader/5.14.4/s3.jquery.fine-uploader/s3.jquery.fine-uploader.min.js">
-  </script>
-  <script src="https://sdk.amazonaws.com/js/aws-sdk-2.80.0.min.js"></script>
+  <script src="https://sdk.amazonaws.com/js/aws-sdk-2.82.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/file-uploader/5.14.4/s3.fine-uploader/s3.fine-uploader.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/file-uploader/5.14.4/s3.jquery.fine-uploader/s3.jquery.fine-uploader.min.js"></script>
+
   <script src="app.js"></script>
+  <script src="uuid-by-string.js"></script>
 
   <script type="text/template" id="qq-template">
     <div class="qq-uploader-selector qq-uploader qq-gallery" qq-drop-area-text="Drop files here">
@@ -99,9 +99,25 @@
   </script>
 </head>
 <body>
-  <a href="https://treehousegenomics.soe.ucsc.edu">
-    <img src="logo.png" style="padding: 8px; height: 85px;" class="center-block img-responsive"/>
-  </a>
-  <div id="signinButton" class="g-signin2" data-onsuccess="loginToGoogle"></div>
-  <div id="fine-uploader-s3"></div>
+	<div class='container-fluid'>
+		<div class='row'>
+			<div class='col-sm-4'>
+				<div>
+					<a href="https://treehousegenomics.soe.ucsc.edu">
+						<img src="logo.png" style="padding: 8px; height: 85px;" class="center-block img-responsive"/>
+					</a>
+				</div>
+			</div>
+			<div class='col-sm-8'>
+				<div id="signIn" class='g-signin2' data-onsuccess="signIn"></div>
+        <div id="signOut">
+          <div>
+            <a href="#" onclick="signOut();">Sign out</a>
+          </div>
+          <div id="name"></div><div id="email"></div>
+        </div>
+			</div>
+		</div>
+    <div id="fine-uploader-s3"></div>
+  </div>
 </body>
