@@ -5,7 +5,7 @@ function signIn(response) {
   const profile = response.getBasicProfile();
   s3DemoGlobals.email = profile.getEmail();
   s3DemoGlobals.name = profile.getName();
-  console.log(s3DemoGlobals.email, s3DemoGlobals.name);
+  console.log("Logged In:", s3DemoGlobals.email, s3DemoGlobals.name);
 
   $("#name").html(s3DemoGlobals.name);
   $("#email").html(s3DemoGlobals.email);
@@ -16,70 +16,69 @@ function signIn(response) {
   $("#fine-uploader-s3").show();
 }
 
+// eslint-disable-next-line no-unused-vars
 function signOut() {
   $("#fine-uploader-s3").hide();
-  var auth2 = gapi.auth2.getAuthInstance();
+  // eslint-disable-next-line no-undef
+  const auth2 = gapi.auth2.getAuthInstance();
   auth2.signOut().then(console.log("User signed out."));
 }
 
-$(function() {
-  var assumeRoleWithWebIdentity = function(params) {
+function assumeRoleWithWebIdentity(params) {
+  s3DemoGlobals.roleArn = params.roleArn || s3DemoGlobals.roleArn;
+  s3DemoGlobals.providerId = params.providerId || s3DemoGlobals.providerId;
+  s3DemoGlobals.idToken = params.idToken || s3DemoGlobals.idToken;
 
-    s3DemoGlobals.roleArn = params.roleArn || s3DemoGlobals.roleArn;
-    s3DemoGlobals.providerId = params.providerId || s3DemoGlobals.providerId;
-    s3DemoGlobals.idToken = params.idToken || s3DemoGlobals.idToken;
+  const assumeRoleParams = {
+    RoleArn: s3DemoGlobals.roleArn,
+    RoleSessionName: "web-identity-federation",
+    WebIdentityToken: s3DemoGlobals.idToken,
+  };
 
-    let assumeRoleParams = {
-      RoleArn: s3DemoGlobals.roleArn,
-      RoleSessionName: "web-identity-federation",
-      WebIdentityToken: s3DemoGlobals.idToken
-    };
+  if (s3DemoGlobals.providerId) {
+    assumeRoleParams.ProviderId = s3DemoGlobals.providerId;
+  }
 
-    if (s3DemoGlobals.providerId) {
-      assumeRoleParams.ProviderId = s3DemoGlobals.providerId;
-    }
+  // eslint-disable-next-line no-undef
+  const sts = new AWS.STS();
+  sts.assumeRoleWithWebIdentity(assumeRoleParams,
+                                params.callback || s3DemoGlobals.updateCredentials);
+  s3DemoGlobals.sts = sts;
+}
 
-    let sts = new AWS.STS();
-    sts.assumeRoleWithWebIdentity(assumeRoleParams, params.callback || s3DemoGlobals.updateCredentials);
-    s3DemoGlobals.sts = sts;
-  },
-    getFuCredentials = function(data) {
-      return {
-        accessKey: data.Credentials.AccessKeyId,
-        secretKey: data.Credentials.SecretAccessKey,
-        sessionToken: data.Credentials.SessionToken,
-        expiration: data.Credentials.Expiration
-      };
-    };
+function getFuCredentials(data) {
+  return {
+    accessKey: data.Credentials.AccessKeyId,
+    secretKey: data.Credentials.SecretAccessKey,
+    sessionToken: data.Credentials.SessionToken,
+    expiration: data.Credentials.Expiration,
+  };
+}
 
+function updateCredentials(error, data) {
+  if (!error) {
+    $("#fine-uploader-s3").fineUploaderS3("setCredentials", s3DemoGlobals.getFuCredentials(data));
+  }
+  // eslint-disable-next-line no-undef
+  AWS.config.update({
+    credentials: {
+      // region: data.Credentials.Region,
+      // region: "us-west-2",
+      accessKeyId: data.Credentials.AccessKeyId,
+      secretAccessKey: data.Credentials.SecretAccessKey,
+      sessionToken: data.Credentials.SessionToken,
+    },
+  });
+}
+
+// eslint-disable-next-line prefer-arrow-callback
+$(document).ready(function() {
   s3DemoGlobals.assumeRoleWithWebIdentity = assumeRoleWithWebIdentity;
   s3DemoGlobals.getFuCredentials = getFuCredentials;
 
-
-
-  bucketUrl = "https://receiving-treehouse-ucsc-edu.s3-us-west-2.amazonaws.com",
-    updateCredentials = function(error, data) {
-      if (!error) {
-        $('#fine-uploader-s3').fineUploaderS3("setCredentials", s3DemoGlobals.getFuCredentials(data));
-      }
-      console.log(data.Credentials);
-      AWS.config.update({
-          credentials: {
-            // region: data.Credentials.Region,
-            // region: 'us-west-2',
-            accessKeyId: data.Credentials.AccessKeyId,
-            secretAccessKey: data.Credentials.SecretAccessKey,
-            sessionToken: data.Credentials.SessionToken
-          }
-      });
-    },
-    hideUploader = function() {
-      $("#fine-uploader-s3").hide();
-    };
-
   $("#fine-uploader-s3").fineUploaderS3({
     request: {
-      endpoint: bucketUrl,
+      endpoint: "https://receiving-treehouse-ucsc-edu.s3-us-west-2.amazonaws.com",
       // these are undefined at this point but should fill in just in case tags get lost
       // params: {
       //   email: s3DemoGlobals.email,
@@ -88,30 +87,26 @@ $(function() {
     },
     objectProperties: {
       acl: "private",
-
-      // The key for each file will follow this format: {USER_NAME}/{UUID}.{FILE_EXTENSION}
-      key: function(id) {
-        var filename = this.getName(id), size = this.getSize(id);
-        var uuid = getUUIDByString(s3DemoGlobals.email + filename + size.toString());
-
-        // return qq.format("{}/{}.{}.{}", s3DemoGlobals.userName, filename, uuid, qq.getExtension(filename));
-        // return qq.format("{}/{}", s3DemoGlobals.email, filename);
-        // return qq.format("{}", filename);
+      // S3 key = hash of email + original file name + size so
+      key: function (id) {
+        // eslint-disable-next-line no-undef
+        const uuid = getUUIDByString(s3DemoGlobals.email + this.getName(id) + this.getSize(id));
+        // eslint-disable-next-line no-undef
         return qq.format("{}", uuid);
-      }
+      },
     },
     cors: {
-      //all requests are expected to be cross-domain requests
+      // all requests are expected to be cross-domain requests
       expected: true,
 
-      //if you want cookies to be sent along with the request
-      sendCredentials: true
+      // if you want cookies to be sent along with the request
+      sendCredentials: true,
     },
     chunking: {
       enabled: true,
       concurrent: {
-        enabled: true
-      }
+        enabled: true,
+      },
     },
     resume: {
       enabled: true,
@@ -122,82 +117,80 @@ $(function() {
     },
     maxConnections: 5,
     callbacks: {
-        onComplete: function (id, name, responseJSON, xhr) {
-          console.log("Finished uploading " + name);
-          tags = {
-            filename: name,
-            uid: this.getKey(id),
-            email: s3DemoGlobals.email,
-            name: s3DemoGlobals.name,
-          }
-          console.log(tags);
+      onComplete: function(id, name) {
+        const tags = {
+          filename: name,
+          uuid: this.getKey(id),
+          email: s3DemoGlobals.email,
+          name: s3DemoGlobals.name,
+        };
 
-            let s3 = new AWS.S3({region: "us-west-2"});
-						var params = {
-              Bucket: 'receiving-treehouse-ucsc-edu',
-							Key: this.getKey(id), 
-							Tagging: {
-							 TagSet: [
-									{
-								 Key: "filename", 
-								 Value: this.getName(id)
-								} 
-							 ]
-							}
-						 };
-             console.log(params);
-						 s3.putObjectTagging(params, function(err, data) {
-							 if (err) console.log(err, err.stack); // an error occurred
-							 else     console.log(data);           // successful response
-						 });
-            s3.putObject({
-                Bucket: 'receiving-treehouse-ucsc-edu',
-                Key: this.getKey(id) + ".json",
-                Body: JSON.stringify(tags, null, "  "),
-            }, function(err, data) {
-                if (err) console.log(err, err.stack); // an error occurred
-                else     console.log(data);           // successful response
-            });
-        },
-        onAllComplete: function (succeeded, failed) {
-            console.log("onAllComplete");
-            console.log(succeeded, failed);
-        }
+        // eslint-disable-next-line no-undef
+        const s3 = new AWS.S3({region: "us-west-2"});
+        const params = {
+          Bucket: "receiving-treehouse-ucsc-edu",
+          Key: this.getKey(id),
+          Tagging: {
+            // eslint-disable-next-line prefer-arrow-callback
+            TagSet: Object.keys(tags).map(function(key) {
+              return {Key: key, Value: tags[key]};
+            }),
+          },
+        };
+        console.log(params);
+        s3.putObjectTagging(params, (err, data) => {
+          if (err) console.log(err, err.stack);
+          else console.log("putObjectTagging", data);
+        });
+        s3.putObject({
+          Bucket: "receiving-treehouse-ucsc-edu",
+          Key: this.getKey(id) + ".json",
+          Body: JSON.stringify(tags, null, "  "),
+        }, (err, data) => {
+          if (err) console.log(err, err.stack);
+          else console.log("putObject", data);
+        });
+      },
+      onAllComplete: (succeeded, failed) => {
+        console.log("onAllComplete");
+        console.log(succeeded, failed);
+      },
+    },
+  })
+  .on("complete", function(event, id, name, response) {
+    const $fileEl = $(this).fineUploaderS3("getItemByFileId", id);
+    const $viewBtn = $fileEl.find(".view-btn");
+    if (response.success) {
+      $viewBtn.show();
     }
   })
-    .on('complete', function(event, id, name, response, xhr) {
-      var $fileEl = $(this).fineUploaderS3("getItemByFileId", id),
-        $viewBtn = $fileEl.find(".view-btn"),
-        key = $(this).fineUploaderS3("getKey", id);
+  .on("credentialsExpired", () => {
+    // eslint-disable-next-line no-undef
+    const promise = new qq.Promise();
 
-      if (response.success) {
-        $viewBtn.show();
-        $viewBtn.attr("href", bucketUrl + "/" + key);
-      }
-    })
-    .on("credentialsExpired", function() {
-      var promise = new qq.Promise();
-
-      // Grab new credentials
-      s3DemoGlobals.assumeRoleWithWebIdentity({
-        callback: function(error, data) {
-          if (error) {
-            promise.failure("Failed to assume role");
-          }
-          else {
-            promise.success(s3DemoGlobals.getFuCredentials(data));
-          }
+    // Grab new credentials
+    s3DemoGlobals.assumeRoleWithWebIdentity({
+      callback: (error, data) => {
+        if (error) {
+          promise.failure("Failed to assume role");
+        } else {
+          promise.success(s3DemoGlobals.getFuCredentials(data));
         }
-      });
-
-      return promise;
+      },
     });
+
+    return promise;
+  });
 
   s3DemoGlobals.updateCredentials = updateCredentials;
 
-  $(document).on("tokenExpired.s3Demo", hideUploader);
-  $(document).on("tokenReceived.s3Demo", function() {
+  $(document).on("tokenExpired.s3Demo", () => {
+    $("#fine-uploader-s3").hide();
+  });
+
+  $(document).on("tokenReceived.s3Demo", () => {
     $("#fine-uploader-s3").show();
   });
+
   $(document).trigger("tokenExpired.s3Demo");
 });
