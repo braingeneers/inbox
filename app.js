@@ -1,15 +1,15 @@
-const s3DemoGlobals = {};
+const grx = {};
 
 // eslint-disable-next-line no-unused-vars
 function signIn(response) {
   const profile = response.getBasicProfile();
-  s3DemoGlobals.email = profile.getEmail();
-  s3DemoGlobals.name = profile.getName();
-  console.log("Logged In:", s3DemoGlobals.email, s3DemoGlobals.name);
+  grx.email = profile.getEmail();
+  grx.name = profile.getName();
+  console.log("User:", grx.email, grx.name);
 
-  $("#name").html(s3DemoGlobals.name);
-  $("#email").html(s3DemoGlobals.email);
-  s3DemoGlobals.assumeRoleWithWebIdentity({
+  $("#name").html(grx.name);
+  $("#email").html(grx.email);
+  grx.assumeRoleWithWebIdentity({
     roleArn: "arn:aws:iam::238605363322:role/receiving-browser-role",
     idToken: response.getAuthResponse().id_token,
   });
@@ -25,25 +25,25 @@ function signOut() {
 }
 
 function assumeRoleWithWebIdentity(params) {
-  s3DemoGlobals.roleArn = params.roleArn || s3DemoGlobals.roleArn;
-  s3DemoGlobals.providerId = params.providerId || s3DemoGlobals.providerId;
-  s3DemoGlobals.idToken = params.idToken || s3DemoGlobals.idToken;
+  grx.roleArn = params.roleArn || grx.roleArn;
+  grx.providerId = params.providerId || grx.providerId;
+  grx.idToken = params.idToken || grx.idToken;
 
   const assumeRoleParams = {
-    RoleArn: s3DemoGlobals.roleArn,
+    RoleArn: grx.roleArn,
     RoleSessionName: "web-identity-federation",
-    WebIdentityToken: s3DemoGlobals.idToken,
+    WebIdentityToken: grx.idToken,
   };
 
-  if (s3DemoGlobals.providerId) {
-    assumeRoleParams.ProviderId = s3DemoGlobals.providerId;
+  if (grx.providerId) {
+    assumeRoleParams.ProviderId = grx.providerId;
   }
 
   // eslint-disable-next-line no-undef
   const sts = new AWS.STS();
   sts.assumeRoleWithWebIdentity(assumeRoleParams,
-                                params.callback || s3DemoGlobals.updateCredentials);
-  s3DemoGlobals.sts = sts;
+                                params.callback || grx.updateCredentials);
+  grx.sts = sts;
 }
 
 function getFuCredentials(data) {
@@ -57,7 +57,7 @@ function getFuCredentials(data) {
 
 function updateCredentials(error, data) {
   if (!error) {
-    $("#fine-uploader-s3").fineUploaderS3("setCredentials", s3DemoGlobals.getFuCredentials(data));
+    $("#fine-uploader-s3").fineUploaderS3("setCredentials", grx.getFuCredentials(data));
   }
   // eslint-disable-next-line no-undef
   AWS.config.update({
@@ -73,16 +73,16 @@ function updateCredentials(error, data) {
 
 // eslint-disable-next-line prefer-arrow-callback
 $(document).ready(function() {
-  s3DemoGlobals.assumeRoleWithWebIdentity = assumeRoleWithWebIdentity;
-  s3DemoGlobals.getFuCredentials = getFuCredentials;
+  grx.assumeRoleWithWebIdentity = assumeRoleWithWebIdentity;
+  grx.getFuCredentials = getFuCredentials;
 
   $("#fine-uploader-s3").fineUploaderS3({
     request: {
       endpoint: "https://receiving-treehouse-ucsc-edu.s3-us-west-2.amazonaws.com",
       // these are undefined at this point but should fill in just in case tags get lost
       // params: {
-      //   email: s3DemoGlobals.email,
-      //   name: s3DemoGlobals.name,
+      //   email: grx.email,
+      //   name: grx.name,
       // },
     },
     objectProperties: {
@@ -90,7 +90,7 @@ $(document).ready(function() {
       // S3 key = hash of email + original file name + size so
       key: function (id) {
         // eslint-disable-next-line no-undef
-        const uuid = getUUIDByString(s3DemoGlobals.email + this.getName(id) + this.getSize(id));
+        const uuid = getUUIDByString(grx.email + this.getName(id) + this.getSize(id));
         // eslint-disable-next-line no-undef
         return qq.format("{}", uuid);
       },
@@ -107,6 +107,7 @@ $(document).ready(function() {
       concurrent: {
         enabled: true,
       },
+      mandatory: true, // so we consistent
     },
     resume: {
       enabled: true,
@@ -117,13 +118,16 @@ $(document).ready(function() {
     },
     maxConnections: 5,
     callbacks: {
-      onComplete: function(id, name) {
+      onComplete: function(id, name, responseJSON, xhr) {
         const tags = {
-          filename: name,
+          original_filename: name,
           uuid: this.getKey(id),
-          email: s3DemoGlobals.email,
-          name: s3DemoGlobals.name,
+          submitter_email: grx.email.toLowerCase(),
+          submitter_name: grx.name.toLowerCase(),
+          etag: xhr.responseXML.getElementsByTagName("ETag")[0].textContent.slice(1, -1),
         };
+        console.log("Tags:");
+        console.log(tags);
 
         // eslint-disable-next-line no-undef
         const s3 = new AWS.S3({region: "us-west-2"});
@@ -137,23 +141,19 @@ $(document).ready(function() {
             }),
           },
         };
-        console.log(params);
         s3.putObjectTagging(params, (err, data) => {
-          if (err) console.log(err, err.stack);
-          else console.log("putObjectTagging", data);
+          if (err) console.log(err, err.stack, data);
         });
         s3.putObject({
           Bucket: "receiving-treehouse-ucsc-edu",
           Key: this.getKey(id) + ".json",
           Body: JSON.stringify(tags, null, "  "),
         }, (err, data) => {
-          if (err) console.log(err, err.stack);
-          else console.log("putObject", data);
+          if (err) console.log(err, err.stack, data);
         });
       },
       onAllComplete: (succeeded, failed) => {
-        console.log("onAllComplete");
-        console.log(succeeded, failed);
+        console.log("onAllComplete", succeeded, failed);
       },
     },
   })
@@ -169,12 +169,12 @@ $(document).ready(function() {
     const promise = new qq.Promise();
 
     // Grab new credentials
-    s3DemoGlobals.assumeRoleWithWebIdentity({
+    grx.assumeRoleWithWebIdentity({
       callback: (error, data) => {
         if (error) {
           promise.failure("Failed to assume role");
         } else {
-          promise.success(s3DemoGlobals.getFuCredentials(data));
+          promise.success(grx.getFuCredentials(data));
         }
       },
     });
@@ -182,7 +182,7 @@ $(document).ready(function() {
     return promise;
   });
 
-  s3DemoGlobals.updateCredentials = updateCredentials;
+  grx.updateCredentials = updateCredentials;
 
   $(document).on("tokenExpired.s3Demo", () => {
     $("#fine-uploader-s3").hide();
