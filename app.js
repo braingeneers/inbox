@@ -1,4 +1,4 @@
-const grx = {};
+const grx = {}; // receiving globals
 
 // eslint-disable-next-line no-unused-vars
 function signIn(response) {
@@ -13,12 +13,12 @@ function signIn(response) {
     roleArn: "arn:aws:iam::238605363322:role/receiving-browser-role",
     idToken: response.getAuthResponse().id_token,
   });
-  $("#fine-uploader-s3").show();
+  $("#fine-uploader").show();
 }
 
 // eslint-disable-next-line no-unused-vars
 function signOut() {
-  $("#fine-uploader-s3").hide();
+  $("#fine-uploader").hide();
   // eslint-disable-next-line no-undef
   const auth2 = gapi.auth2.getAuthInstance();
   auth2.signOut().then(console.log("User signed out."));
@@ -57,7 +57,7 @@ function getFuCredentials(data) {
 
 function updateCredentials(error, data) {
   if (!error) {
-    $("#fine-uploader-s3").fineUploaderS3("setCredentials", grx.getFuCredentials(data));
+    $("#fine-uploader").fineUploaderS3("setCredentials", grx.getFuCredentials(data));
   }
   // eslint-disable-next-line no-undef
   AWS.config.update({
@@ -76,7 +76,7 @@ $(document).ready(function() {
   grx.assumeRoleWithWebIdentity = assumeRoleWithWebIdentity;
   grx.getFuCredentials = getFuCredentials;
 
-  $("#fine-uploader-s3").fineUploaderS3({
+  $("#fine-uploader").fineUploaderS3({
     request: {
       endpoint: "https://receiving-treehouse-ucsc-edu.s3-us-west-2.amazonaws.com",
       // these are undefined at this point but should fill in just in case tags get lost
@@ -87,12 +87,8 @@ $(document).ready(function() {
     },
     objectProperties: {
       acl: "private",
-      // S3 key = hash of email + original file name + size so
       key: function (id) {
-        // eslint-disable-next-line no-undef
-        const uuid = getUUIDByString(grx.email + this.getName(id) + this.getSize(id));
-        // eslint-disable-next-line no-undef
-        return qq.format("{}", uuid);
+        return this.getUuid(id);
       },
     },
     cors: {
@@ -120,6 +116,7 @@ $(document).ready(function() {
     callbacks: {
       onComplete: function(id, name, responseJSON, xhr) {
         const tags = {
+          archive: true,
           original_filename: name,
           uuid: this.getKey(id),
           submitter_email: grx.email.toLowerCase(),
@@ -182,14 +179,17 @@ $(document).ready(function() {
     return promise;
   });
 
+  console.log($("#fine-uploader").fineUploader("getResumableFilesData"));
+
+
   grx.updateCredentials = updateCredentials;
 
   $(document).on("tokenExpired.s3Demo", () => {
-    $("#fine-uploader-s3").hide();
+    $("#fine-uploader").hide();
   });
 
   $(document).on("tokenReceived.s3Demo", () => {
-    $("#fine-uploader-s3").show();
+    $("#fine-uploader").show();
   });
 
   $(document).trigger("tokenExpired.s3Demo");
