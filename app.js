@@ -116,12 +116,11 @@ $(document).ready(function() {
     callbacks: {
       onComplete: function(id, name, responseJSON, xhr) {
         const tags = {
-          archive: true,
-          original_filename: name,
+          filename: name,
           uuid: this.getKey(id),
-          submitter_email: grx.email.toLowerCase(),
-          submitter_name: grx.name.toLowerCase(),
           etag: xhr.responseXML.getElementsByTagName("ETag")[0].textContent.slice(1, -1),
+          submitter: "{} <{}>".format(grx.name, grx.email.toLowerCase()),
+          archive: true,
         };
         console.log("Tags:");
         console.log(tags);
