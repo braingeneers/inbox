@@ -110,7 +110,7 @@ $(document).ready(function() {
     },
     validation: {
       itemLimit: 20,
-      sizeLimit: 20 * 1073741824,
+      sizeLimit: 30 * 1073741824,
     },
     maxConnections: 5,
     // callbacks: {
