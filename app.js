@@ -62,8 +62,6 @@ function updateCredentials(error, data) {
   // eslint-disable-next-line no-undef
   AWS.config.update({
     credentials: {
-      // region: data.Credentials.Region,
-      // region: "us-west-2",
       accessKeyId: data.Credentials.AccessKeyId,
       secretAccessKey: data.Credentials.SecretAccessKey,
       sessionToken: data.Credentials.SessionToken,
@@ -88,7 +86,9 @@ $(document).ready(function() {
     objectProperties: {
       acl: "private",
       key: function (id) {
-        return this.getUuid(id);
+        // return this.getUuid(id);
+        // eslint-disable-next-line no-undef
+        return qq.format("{}/{}", grx.email, this.getName(id));
       },
     },
     cors: {
@@ -113,46 +113,48 @@ $(document).ready(function() {
       sizeLimit: 20 * 1073741824,
     },
     maxConnections: 5,
-    callbacks: {
-      onComplete: function(id, name, responseJSON, xhr) {
-        const tags = {
-          phi: true, // assume anything received is phi until proven otherwise
-          archive: true, // move to glacier and keep forever
-          original_filename: name,
-          uuid: this.getKey(id),
-          etag: xhr.responseXML.getElementsByTagName("ETag")[0].textContent.slice(1, -1),
-          submitter: "{} <{}>".format(grx.name, grx.email.toLowerCase()),
-        };
-        console.log("Tags:");
-        console.log(tags);
+    // callbacks: {
+    //   onComplete: function(id, name, responseJSON, xhr) {
+    //     const tags = {
+    //       phi: true, // assume anything received is phi until proven otherwise
+    //       archive: true, // move to glacier and keep forever
+    //       original_filename: name,
+    //       // uuid: this.getKey(id),
+    //       // etag: xhr.responseXML.getElementsByTagName("ETag")[0].textContent.slice(1, -1),
+    //       submitter: "{} <{}>".format(grx.name, grx.email.toLowerCase()),
+    //     };
+    //     console.log("Tags:");
+    //     console.log(tags);
 
-        // eslint-disable-next-line no-undef
-        const s3 = new AWS.S3({region: "us-west-2"});
-        const params = {
-          Bucket: "receiving-treehouse-ucsc-edu",
-          Key: this.getKey(id),
-          Tagging: {
-            // eslint-disable-next-line prefer-arrow-callback
-            TagSet: Object.keys(tags).map(function(key) {
-              return {Key: key, Value: tags[key]};
-            }),
-          },
-        };
-        s3.putObjectTagging(params, (err, data) => {
-          if (err) console.log(err, err.stack, data);
-        });
-        s3.putObject({
-          Bucket: "receiving-treehouse-ucsc-edu",
-          Key: this.getKey(id) + ".json",
-          Body: JSON.stringify(tags, null, "  "),
-        }, (err, data) => {
-          if (err) console.log(err, err.stack, data);
-        });
-      },
-      onAllComplete: (succeeded, failed) => {
-        console.log("onAllComplete", succeeded, failed);
-      },
-    },
+    //     // eslint-disable-next-line no-undef
+    //     const s3 = new AWS.S3({region: "us-west-2"});
+    //     const params = {
+    //       Bucket: "receiving-treehouse-ucsc-edu",
+    //       Key: this.getKey(id),
+    //       Tagging: {
+    //         // eslint-disable-next-line prefer-arrow-callback
+    //         TagSet: Object.keys(tags).map(function(key) {
+    //           return {Key: key, Value: tags[key]};
+    //         }),
+    //       },
+    //     };
+    //     s3.putObjectTagging(params, (err, data) => {
+    //       if (err) console.log(err, err.stack, data);
+    //     });
+
+    //     // Add a key.json file with all the tags in it
+    //     s3.putObject({
+    //       Bucket: "receiving-treehouse-ucsc-edu",
+    //       Key: this.getKey(id) + ".json",
+    //       Body: JSON.stringify(tags, null, "  "),
+    //     }, (err, data) => {
+    //       if (err) console.log(err, err.stack, data);
+    //     });
+    //   },
+    //   onAllComplete: (succeeded, failed) => {
+    //     console.log("onAllComplete", succeeded, failed);
+    //   },
+    // },
   })
   .on("complete", function(event, id, name, response) {
     const $fileEl = $(this).fineUploaderS3("getItemByFileId", id);
