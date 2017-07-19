@@ -116,11 +116,12 @@ $(document).ready(function() {
     callbacks: {
       onComplete: function(id, name, responseJSON, xhr) {
         const tags = {
-          filename: name,
+          phi: true, // assume anything received is phi until proven otherwise
+          archive: true, // move to glacier and keep forever
+          original_filename: name,
           uuid: this.getKey(id),
           etag: xhr.responseXML.getElementsByTagName("ETag")[0].textContent.slice(1, -1),
           submitter: "{} <{}>".format(grx.name, grx.email.toLowerCase()),
-          archive: true,
         };
         console.log("Tags:");
         console.log(tags);
