@@ -10,7 +10,7 @@ function signIn(response) {
   $("#name").html(grx.name);
   $("#email").html(grx.email);
   grx.assumeRoleWithWebIdentity({
-    roleArn: "arn:aws:iam::238605363322:role/receiving-browser-role",
+    roleArn: "arn:aws:iam::443872533066:role/browser-inbox-role",
     idToken: response.getAuthResponse().id_token,
   });
   $("#fine-uploader").show();
@@ -76,7 +76,7 @@ $(document).ready(function() {
 
   $("#fine-uploader").fineUploaderS3({
     request: {
-      endpoint: "https://receiving-treehouse-ucsc-edu.s3-us-west-2.amazonaws.com",
+      endpoint: "https://braingeneers-inbox.s3-us-west-2.amazonaws.com",
       // these are undefined at this point but should fill in just in case tags get lost
       // params: {
       //   email: grx.email,
