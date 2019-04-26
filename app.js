@@ -109,7 +109,7 @@ $(document).ready(function() {
       enabled: true,
     },
     validation: {
-      itemLimit: 50,
+      itemLimit: 100,  //cph changed from 50
       sizeLimit: 5 * 1073741824,
     },
     maxConnections: 5,
