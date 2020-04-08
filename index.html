@@ -18,7 +18,14 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/file-uploader/5.14.4/s3.fine-uploader/s3.fine-uploader.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/file-uploader/5.14.4/s3.jquery.fine-uploader/s3.jquery.fine-uploader.min.js"></script>
 
-  <script src="app.js"></script>
+  <script>
+    var uuid = '';
+  </script>
+
+
+  <script src="app.js">
+
+  </script>
 
   <script type="text/template" id="qq-template">
     <div class="qq-uploader-selector qq-uploader qq-gallery" qq-drop-area-text="Drop files here">
@@ -95,9 +102,10 @@
                 </div>
             </dialog>
         </div>
-  </script>
+  </script>+
 </head>
 <body>
+
   <a href="https://braingeneers.gi.ucsc.edu">
     <img src="logo.png" style="padding: 8px; height: 85px;" class="img-responsive"/>
   </a>
@@ -109,4 +117,34 @@
   <!-- </div> -->
   <div id="signIn" class='g-signin2' data-onsuccess="signIn"></div>
   <div id="fine-uploader"></div>
+  <form style="margin-top:1cm;">
+    <label>UUID:</label>
+    <input type="text" id='uuid_input'><br><br>
+    <button id="btn">Save UUID</button>
+  </form>
+  <script>
+        // example {id:1592304983049, title: 'Deadpool', year: 2015}
+        const getUuid = (ev)=>{
+            ev.preventDefault();  //to stop the form submitting
+            let  uuid_element= {
+                title: document.getElementById('uuid_input').value,
+            }
+            uuid = uuid_element
+          //  document.forms[0].reset(); // to clear the form for the next entries
+            //document.querySelector('form').reset();
+
+            //for display purposes only
+            console.warn('added' , {uuid} );
+          //  let pre = document.querySelector('#msg pre');
+          //  pre.textContent = '\n' + JSON.stringify(movies, '\t', 2);
+
+            //saving to localStorage
+            //localStorage.setItem('MyMovieList', JSON.stringify(movies) );
+        }
+
+
+    document.addEventListener('DOMContentLoaded', ()=>{
+            document.getElementById('btn').addEventListener('click', getUuid);
+        });
+  </script>
 </body>
