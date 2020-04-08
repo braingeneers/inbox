@@ -1,5 +1,5 @@
 const grx = {}; // receiving globals
-
+var uuid='';
 // eslint-disable-next-line no-unused-vars
 function signIn(response) {
   const profile = response.getBasicProfile();
@@ -88,7 +88,8 @@ $(document).ready(function() {
       key: function (id) {
         // return this.getUuid(id);
         // eslint-disable-next-line no-undef
-        return qq.format("{}/{}", grx.email, this.getName(id));
+        console.log(uuid.title);
+        return qq.format("{}/{}/{}", grx.email, uuid.title, this.getName(id));
       },
     },
     cors: {
