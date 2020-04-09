@@ -1,6 +1,7 @@
 debug:
 	# Serve app and auto reload
-	sudo ./node_modules/reload/bin/reload -p 80
+	# sudo ./node_modules/reload/bin/reload -p 80
+	php -S localhost:8000
 
 push:
 	# push to production
