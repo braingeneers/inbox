@@ -1,0 +1,35 @@
+import Uppy = require('@uppy/core')
+
+type CoreLocale = Uppy.Locale<
+  | 'addBulkFilesFailed'
+  | 'youCanOnlyUploadX'
+  | 'youHaveToAtLeastSelectX'
+  | 'exceedsSize2'
+  | 'exceedsSize'
+  | 'youCanOnlyUploadFileTypes'
+  | 'noNewAlreadyUploading'
+  | 'noDuplicates'
+  | 'companionError'
+  | 'companionUnauthorizeHint'
+  | 'failedToUpload'
+  | 'noInternetConnection'
+  | 'connectedToInternet'
+  | 'noFilesFound'
+  | 'selectX'
+  | 'selectAllFilesFromFolderNamed'
+  | 'unselectAllFilesFromFolderNamed'
+  | 'selectFileNamed'
+  | 'unselectFileNamed'
+  | 'openFolderNamed'
+  | 'cancel'
+  | 'logOut'
+  | 'filter'
+  | 'resetFilter'
+  | 'loading'
+  | 'authenticateWithTitle'
+  | 'authenticateWith'
+  | 'emptyFolderAdded'
+  | 'folderAdded'
+>
+
+export = CoreLocale

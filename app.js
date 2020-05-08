@@ -9,10 +9,10 @@ function signIn(response) {
 
   $("#name").html(grx.name);
   $("#email").html(grx.email);
-  grx.assumeRoleWithWebIdentity({
-    roleArn: "arn:aws:iam::443872533066:role/browser-inbox-role",
-    idToken: response.getAuthResponse().id_token,
-  });
+  // grx.assumeRoleWithWebIdentity({
+  //   roleArn: "arn:aws:iam::443872533066:role/browser-inbox-role",
+  //   idToken: response.getAuthResponse().id_token,
+  // });
   $("#fine-uploader").show();
 }
 
@@ -47,36 +47,41 @@ function assumeRoleWithWebIdentity(params) {
 }
 
 function getFuCredentials(data) {
-  return {
-    accessKey: data.Credentials.AccessKeyId,
-    secretKey: data.Credentials.SecretAccessKey,
-    sessionToken: data.Credentials.SessionToken,
-    expiration: data.Credentials.Expiration,
-  };
+  // return {
+  //   accessKey: data.Credentials.AccessKeyId,
+  //   secretKey: data.Credentials.SecretAccessKey,
+  //   sessionToken: data.Credentials.SessionToken,
+  //   expiration: data.Credentials.Expiration,
+  // };
 }
 
 function updateCredentials(error, data) {
-  if (!error) {
-    $("#fine-uploader").fineUploaderS3("setCredentials", grx.getFuCredentials(data));
-  }
-  // eslint-disable-next-line no-undef
-  AWS.config.update({
-    credentials: {
-      accessKeyId: data.Credentials.AccessKeyId,
-      secretAccessKey: data.Credentials.SecretAccessKey,
-      sessionToken: data.Credentials.SessionToken,
-    },
-  });
+  // if (!error) {
+  //   $("#fine-uploader").fineUploaderS3("setCredentials", grx.getFuCredentials(data));
+  // }
+  // // eslint-disable-next-line no-undef
+  // AWS.config.update({
+  //   credentials: {
+  //     // accessKeyId: data.Credentials.AccessKeyId,
+  //     secretAccessKey: data.Credentials.SecretAccessKey,
+  //     sessionToken: data.Credentials.SessionToken,
+  //   },
+  // });
 }
 
 // eslint-disable-next-line prefer-arrow-callback
 $(document).ready(function() {
-  grx.assumeRoleWithWebIdentity = assumeRoleWithWebIdentity;
+  // grx.assumeRoleWithWebIdentity = assumeRoleWithWebIdentity;
   grx.getFuCredentials = getFuCredentials;
 
   $("#fine-uploader").fineUploaderS3({
     request: {
-      endpoint: "https://braingeneers-inbox.s3-us-west-2.amazonaws.com",
+      // accessKey: "0CYGQI2EE9TE4YRWVIIW", // prp key
+      // secretKey: "swYRfkEuVcHoP4LoB4c6eQgn0GIcAaW7SUBYl4T5",
+      accessKey: "AKIAWOWG5LJFPBRYRQMF", //aws key
+      secretKey: "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", // aws key
+      endpoint: "https://braingeneers-inbox.s3-us-west-2.amazonaws.com", // aws endpoint
+      // endpoint: "https://s3.nautilus.optiputer.net", // prp endpoint
       // these are undefined at this point but should fill in just in case tags get lost
       // params: {
       //   email: grx.email,
@@ -85,11 +90,13 @@ $(document).ready(function() {
     },
     objectProperties: {
       acl: "private",
+      bucket: "braingeneers-inbox",
       key: function (id) {
         // return this.getUuid(id);
         // eslint-disable-next-line no-undef
         console.log(uuid.title);
-        return qq.format("{}/{}/{}", grx.email, uuid.title, this.getName(id));
+        return qq.format("{}/{}/{}", grx.email, uuid.title, this.getName(id)); // aws format
+        // return qq.format("{}/{}", uuid.title, this.getName(id)); // prp format
       },
     },
     cors: {
@@ -164,36 +171,36 @@ $(document).ready(function() {
       $viewBtn.show();
     }
   })
-  .on("credentialsExpired", () => {
-    // eslint-disable-next-line no-undef
-    const promise = new qq.Promise();
-
-    // Grab new credentials
-    grx.assumeRoleWithWebIdentity({
-      callback: (error, data) => {
-        if (error) {
-          promise.failure("Failed to assume role");
-        } else {
-          promise.success(grx.getFuCredentials(data));
-        }
-      },
-    });
-
-    return promise;
-  });
+  // .on("credentialsExpired", () => {
+  //   // eslint-disable-next-line no-undef
+  //   const promise = new qq.Promise();
+  //
+  //   // Grab new credentials
+  //   grx.assumeRoleWithWebIdentity({
+  //     callback: (error, data) => {
+  //       if (error) {
+  //         promise.failure("Failed to assume role");
+  //       } else {
+  //         promise.success(grx.getFuCredentials(data));
+  //       }
+  //     },
+  //   });
+  //
+  //   return promise;
+  // });
 
   console.log($("#fine-uploader").fineUploader("getResumableFilesData"));
 
 
   grx.updateCredentials = updateCredentials;
 
-  $(document).on("tokenExpired.s3Demo", () => {
-    $("#fine-uploader").hide();
-  });
+  // $(document).on("tokenExpired.s3Demo", () => {
+  //   $("#fine-uploader").hide();
+  // });
 
-  $(document).on("tokenReceived.s3Demo", () => {
-    $("#fine-uploader").show();
-  });
+  // $(document).on("tokenReceived.s3Demo", () => {
+  //   $("#fine-uploader").show();
+  // });
 
-  $(document).trigger("tokenExpired.s3Demo");
+  // $(document).trigger("tokenExpired.s3Demo");
 });

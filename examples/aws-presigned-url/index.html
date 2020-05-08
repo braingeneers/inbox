@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Braingeneers Inbox</title>
+    <link href="uppy.min.css" rel="stylesheet">
+  </head>
+  <body>
+    <meta name="google-signin-scope" content="profile email">
+    <meta name="google-signin-client_id"
+          content="607661505432-i9uhahk4greur4k049739fm8i9ipijfm.apps.googleusercontent.com">
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <script>
+      var uuid = '';
+    </script>
+    <a href="https://braingeneers.gi.ucsc.edu">
+      <img src="logo.png" style="padding: 8px; height: 85px;" class="img-responsive"/>
+    </a>
+    <div id="signIn" class='g-signin2' data-onsuccess="signIn"></div>
+
+    <form style="margin-top:1cm;">
+      <label>UUID:</label>
+      <input type="text" id='uuid_input'>
+      <button id="btn">Save UUID</button> <br><br>
+    </form>
+    <script>
+          // example {id:1592304983049, title: 'Deadpool', year: 2015}
+          const getUuid = (ev)=>{
+              ev.preventDefault();  //to stop the form submitting
+              let  uuid_element= {
+                  title: document.getElementById('uuid_input').value,
+              }
+              uuid = uuid_element
+            //  document.forms[0].reset(); // to clear the form for the next entries
+              //document.querySelector('form').reset();
+
+              //for display purposes only
+              console.warn('added' , {uuid} );
+            //  let pre = document.querySelector('#msg pre');
+            //  pre.textContent = '\n' + JSON.stringify(movies, '\t', 2);
+
+              //saving to localStorage
+              //localStorage.setItem('MyMovieList', JSON.stringify(movies) );
+          }
+
+
+      document.addEventListener('DOMContentLoaded', ()=>{
+              document.getElementById('btn').addEventListener('click', getUuid);
+          });
+    </script>
+    <script src="bundle.js"></script>
+  </body>
+</html>
