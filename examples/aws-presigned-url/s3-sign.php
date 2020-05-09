@@ -22,25 +22,6 @@ $s3 = new Aws\S3\S3Client([
   ],
 ]);
 
-// AWS S3 Testing
-// CONFIG: Change these variables to a valid region and bucket.
-// $awsEndpoint = getenv('COMPANION_AWS_ENDPOINT') ?: null;
-// $awsRegion = 'us-west-2';
-// $bucket =  'braingeneers-inbox';
-// // Directory to place uploaded files in.
-// $directory = 'eajung@ucsc.edu';
-// //Create the S3 client.
-// $s3 = new Aws\S3\S3Client([
-//   'version' => 'latest',
-//   'endpoint' => $awsEndpoint,
-//   'region' => $awsRegion,
-//   'credentials' => [
-//           'key'    => 'AKIAWOWG5LJFPBRYRQMF',
-//           'secret' => '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',
-//       ],
-// ]);
-
-
 // Retrieve data about the file to be uploaded from the request body.
 $body = json_decode(file_get_contents('php://input'));
 $filename = $body->filename;
