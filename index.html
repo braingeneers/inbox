@@ -116,12 +116,13 @@
   <!--   <div id="name"></div><div id="email"></div> -->
   <!-- </div> -->
   <div id="signIn" class='g-signin2' data-onsuccess="signIn"></div>
-  <div id="fine-uploader"></div>
   <form style="margin-top:1cm;">
     <label>UUID:</label>
-    <input type="text" id='uuid_input'><br><br>
-    <button id="btn">Save UUID</button>
+    <input type="text" id='uuid_input'>
+    <button id="btn">Save UUID</button> <br><br>
   </form>
+  <div id="fine-uploader"></div>
+
   <script>
         // example {id:1592304983049, title: 'Deadpool', year: 2015}
         const getUuid = (ev)=>{
