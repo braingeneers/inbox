@@ -1,5 +1,6 @@
 const grx = {}; // receiving globals
 var uuid='';
+var reminded=0;
 // eslint-disable-next-line no-unused-vars
 function signIn(googleUser) {
   // Useful data for your client-side scripts:
@@ -40,17 +41,13 @@ uppy.use(Dashboard, {
 uppy.use(AwsS3, {
   getUploadParameters (file) {
     file_name =  window.email + '/' + file.name;
-    console.log("Uploaded filename: " + file_name);
-    if (file.name.charAt(4) != '-') {
-      if (window.confirm('Please enter the UUID!\n\nIf you click "ok" you would be redirected to a UUID instruction page. Cancel will load this website ')) {
+    if (window.confirm('Please double check if the file you are uploading has a UUID!\n\nIf you click "ok" you would be redirected to a UUID instruction page. Cancel will ask you to retry.') && (reminded == 0)) {
         window.location.href='https://github.com/braingeneers/internal';
-      };
-    } else {
-      // Send a request to our PHP signing endpoint.
-      return fetch('/s3-sign.php', {
+    } else if (reminded == 1) {
+      reminded = 0;
+      return fetch('/s3-sign.php', { // Send a request to our PHP signing endpoint.
         method: 'post',
-        // Send and receive JSON.
-        headers: {
+        headers: { // Send and receive JSON.
           accept: 'application/json',
           'content-type': 'application/json'
         },
@@ -70,6 +67,8 @@ uppy.use(AwsS3, {
           headers: data.headers
         }
       })
+    } else {
+      reminded = 1;
     }
   }
 })
