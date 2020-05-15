@@ -32,10 +32,11 @@ const uppy = Uppy({
 uppy.use(Dashboard, {
   inline: true,
   target: 'body',
-  metaFields: [
-      { id: 'name', name: 'Name', placeholder: 'file name' },
-      { id: 'caption', name: 'Caption', placeholder: 'describe what the image is about' }
-    ],
+  // metaFields: [
+  //     { id: 'name', name: 'Name', placeholder: 'file name' },
+  //     { id: 'caption', name: 'Caption', placeholder: 'describe what the image is about' }
+  //   ],
+  // browserBackButtonClose: true
 })
 
 uppy.use(AwsS3, {
